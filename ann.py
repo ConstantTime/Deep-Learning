@@ -61,12 +61,24 @@ classifier.compile(optimizer = 'adam' , loss = 'binary_crossentropy' , metrics =
 
 classifier.fit(X_train , y_train , batch_size = 10 , epochs = 100)
 y_pred = classifier.predict(X_test)
+y_pred = y_pred > 0.5
 
 # Making the Confusion Matrix
 from sklearn.metrics import confusion_matrix
 cm = confusion_matrix(y_test, y_pred)
-total = 2000
-accuracy = (cm[0][0] + cm[1][1]) / total
 
+from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import cross_val_score
+def build_classifier() :
+    classifier = Sequential() 
+    classifier.add(Dense(6 , kernel_initializer = 'uniform' , activation = 'relu' , input_dim = 11))
+    classifier.add(Dense(6 , kernel_initializer = 'uniform' , activation = 'relu'))
+    classifier.add(Dense(1 , kernel_initializer = 'uniform' , activation = 'sigmoid')) 
+    classifier.compile(optimizer = 'adam' , loss = 'binary_crossentropy' , metrics = ['accuracy'])
+    return classifier
+
+if __name__=='__main__':
+    classifier = KerasClassifier(build_fn = build_classifier, batch_size = 10 , epochs = 100)
+    accuracies = cross_val_score(estimator = classifier , X = X_train , y = y_train , cv = 10 , n_jobs = 2)
 
 
